@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SG-WastePoints
 // @namespace    gian.scripts
-// @version      1.1.beta
+// @version      1.2.0
 // @updateURL    https://github.com/gianluca-ferrari/SG-WastePoints/raw/master/SteamGift%20Vote-All.user.js
 // @description  Vote-all button to enter all giveaways on the page (skips faded ga and esgt-hidden giveaways)
 // @author       gian raiden
@@ -15,12 +15,17 @@
 // @grant        GM_getValue
 // @grant        GM_setClipboard
 // ==/UserScript==
+/**
+ * Adds game to tampermonkey stored wishlist
+ * @param {string} title 
+ * @param {number} appid 
+ */
 function addToWishlist(title, appid) {
     try{
         var wishlist = loadWishlist();
         var vett = [];
         if(wishlist.find(function(o){return (o.appid == appid);})){
-            return false;
+            return true;
         }
         wishlist.push({'title':title, 'appid':appid});
         saveWishlist(wishlist);
@@ -31,31 +36,45 @@ function addToWishlist(title, appid) {
         return false;
     }
 }
-
-function editSavedWishlist() {
-    try{
-        var temp = prompt('Edit wishlist: OK to save, Cancel to copy to clipboard current one', '[{"title":"game1","appid":"123"},{"title":"game2","appid":"456"}]');
-        if(temp){
-            saveWishlist(JSON.parse(temp));
-        }
-        else{
-            //temp == null, cancel pressed
-            GM_setClipboard(GM_getValue('wishlist', '[]'), 'wishlist json');
-        }
-    }
-    catch(err){
-        alert(err.message);
+/**
+ * remove appid from passed wishlist. changes needs to be saved afterwards.
+ * @param {number} appid 
+ * @param {Array<>} wishlist 
+ */
+function removeFromWishlist(appid, wishlist){
+    var i = wishlist.findIndex(function(v){return v.appid==appid;});
+    if(i==-1){
+        alert('item not found | wishlist empty');
         return;
     }
+    wishlist.splice(i,1);
 }
+
+function displayWishlist(wishlist){
+    $('.modal-body').html('');
+    wishlist.forEach(function(game, i){
+        var p = $('<p></p>');
+        var link = $('<a href="http://store.steampowered.com/app/' + game.appid + '" target="_blank" style="text-decoration:underline">[' + i + '] ' + game.title + ' : ' + game.appid + '</a>');
+        var removebtn = $('<i class="fa fa-times" aria-hidden="true"></i>');
+        removebtn.click(function(){
+            removeFromWishlist(game.appid, wishlist);
+            p.hide();
+        });
+        p.append(removebtn);
+        p.append(link);
+        $('.modal-body').append(p);
+    });
+}
+
 
 function saveWishlist(wishlist) {
     GM_setValue('wishlist', JSON.stringify(wishlist));
     console.log(wishlist);
 }
-
+/**
+ * @return {Array<>}
+ */
 function loadWishlist() {
-    //var wishlist = '{"games":[{"title":"Luxor HD","appid":361020},{"title":"CSGO","appid":54029},{"title":"7 Wonders","appid":275830}]}';
     return JSON.parse(GM_getValue('wishlist', '[]'));
 }
 
@@ -71,7 +90,7 @@ function wastePoints() {
     var q = [];
     $('.modal-header').text('Loading ' + wishlist.length + ' games...');
     $('.modal-body').html('');
-    $('.modal-footer').text('close');
+    $('.sgwaste_modal_button').css('display', 'none');
     $('#myModal').css('display', 'block');
     $.each(wishlist, function (i, e) {
         var deferred = new $.Deferred();
@@ -135,7 +154,6 @@ function wp_helper(list) {
         text += '</table>';
         $('.modal-header').html('RIEPILOGO (' + list.length + ' giveaways)' );
         $('.modal-body').html(text);
-        $('.modal-footer').text('close');
         $('#myModal').css('display', 'block');
         console.log(list);
     }, function () {
@@ -180,6 +198,7 @@ function enterGiveaway(ga, deferred) {
 (function () {
     'use strict';
 
+    //STEAM APP PAGE ONLY
     if (location.href.startsWith('http://store.steampowered.com/app/')){
         var div = document.createElement('div');
         div.innerHTML= `<a class="btnv6_blue_hoverfade btn_medium" href="#" data-store-tooltip="Add to tampermonkey.steamgiftWishlist">
@@ -199,16 +218,50 @@ function enterGiveaway(ga, deferred) {
         return;
     }
 
+    //STEAMGIFT MODAL HTML
+    $('body').append('<div id="myModal" class="modal"> <!-- Modal content --> <div class="modal-content"> <div class="modal-header"> <h2>Riepilogo</h2> </div> <div class="modal-body"> </div> <div class="modal-footer"> </div> </div></div>');
+    $('.modal-footer').append('<a class="nav__button sgwaste_modal_button" id="sgwaste_export" href="#">Export to Clipboard</a>');
+    $('.modal-footer').append('<a class="nav__button sgwaste_modal_button" id="sgwaste_import" href="#">Import</a>');
+    $('.modal-footer').append('<a class="nav__button sgwaste_modal_button" id="sgwaste_save" href="#">Save</a>');
 
-    $('body').append('<div id="myModal" class="modal"> <!-- Modal content --> <div class="modal-content"> <div class="modal-header"> <h2>Riepilogo</h2> </div> <div class="modal-body"> </div> <div class="modal-footer"> <h3>Modal Footer</h3> </div> </div></div>');
-    $('.modal-footer').click(function(){$('#myModal').css('display','none');});
-
+    //STEAMGIFT MODAL CSS
     $('.modal').css({'display':'none', 'position':'fixed', 'z-index':'999', 'padding-top':'100px', 'left':'0', 'top':'0', 'width':'100%', 'height':'100%', 'overflow':'auto', 'background-color':'rgb(0,0,0)', 'background-color':'rgba(0,0,0,0.4)'});
     $('.modal-content').css({'position':'relative', 'background-color':'#fefefe', 'margin':'auto', 'padding':'0', 'border':'1px solid #888', 'width':'fit-content', 'box-shadow':'0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19)', '-webkit-animation-name':'animatetop','-webkit-animation-duration':'0.4s','animation-name':'animatetop', 'animation-duration':'0.4s'});
     $('.modal-header').css({'padding':'2px 16px', 'background-color':'#5cb85c', 'color':'white'});
     $('.modal-body').css({'padding': '2px 16px', 'color':'black'});
     $('.modal-footer').css({'padding':'2px 16px', 'background-color':'#5cb85c', 'corol':'white'});
+    $('.sgwaste_modal_button').css('display', 'none');
 
+
+    //STEAMGIFT MODAL SCRIPT
+    var modal = document.getElementById('myModal');
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+    var wishlist = [];
+    $('#sgwaste_export').click(function(){
+        GM_setClipboard(JSON.stringify(wishlist), 'wishlist json');
+    });
+    $('#sgwaste_import').click(function(){
+        var temp = prompt('Enter new wishlist json:', '[{"title":"game1","appid":"123"},{"title":"game2","appid":"456"}]');
+        if(temp){
+            try{
+                wishlist = JSON.parse(temp);
+                displayWishlist(wishlist);
+            }
+            catch(error){
+                alert(error.message);
+            }
+        }
+    });
+    $('#sgwaste_save').click(function(){
+        saveWishlist(wishlist);
+        modal.style.display= 'none';
+    });
+
+    //STEAMGIFT SCRIPT MAIN BUTTONS
     var link_string = '<a href="#" onclick="return false;" class="short-enter-leave-link"><i class="fa"></i> <span></span></a>';
     var vote_all_string = '<a id="vote_all" href="#" onclick="return false;"><i class="fa fa-plus"></i> Vote all </a>';
     var vote_all_button = $(vote_all_string);
@@ -220,7 +273,23 @@ function enterGiveaway(ga, deferred) {
     $('.page__heading__breadcrumbs').after(waste_points_button);
     $('.page__heading__breadcrumbs').after(edit_wishlist_button);
     $('#waste_points').click(wastePoints);
-    $('#edit_wishlist').click(editSavedWishlist);
+    $('#edit_wishlist').click(function () {
+        try{
+            wishlist = loadWishlist();
+            $('.modal-header').text('Wishlist');
+            $('.sgwaste_modal_button').css('display', 'inline');
+            displayWishlist(wishlist);
+
+            $('#myModal').css('display', 'block');
+
+            return;
+
+        }
+        catch(err){
+            alert(err.message);
+            return;
+        }
+    });
     $('#vote_all').click(function () {
         var giveaways = $('.giveaway__row-inner-wrap').not('.pinned-giveaways__outer-wrap .giveaway__row-inner-wrap').not('.is-faded');
         giveaways = giveaways.not('.esgst-hidden .giveaway__row-inner-wrap');
