@@ -2,6 +2,7 @@
 // @name         SG-WastePoints
 // @namespace    gian.scripts
 // @version      1.1.beta
+// @updateURL    https://github.com/gianluca-ferrari/SG-WastePoints/raw/master/SteamGift%20Vote-All.user.js
 // @description  Vote-all button to enter all giveaways on the page (skips faded ga and esgt-hidden giveaways)
 // @author       gian raiden
 // @include      https://www.steamgifts.com/
