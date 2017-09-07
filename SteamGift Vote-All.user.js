@@ -70,6 +70,7 @@ function wastePoints() {
     var giveawaysList = [];
     var q = [];
     $('.modal-header').text('Loading ' + wishlist.length + ' games...');
+    $('.modal-body').html('');
     $('.modal-footer').text('close');
     $('#myModal').css('display', 'block');
     $.each(wishlist, function (i, e) {
@@ -202,7 +203,7 @@ function enterGiveaway(ga, deferred) {
     $('body').append('<div id="myModal" class="modal"> <!-- Modal content --> <div class="modal-content"> <div class="modal-header"> <h2>Riepilogo</h2> </div> <div class="modal-body"> </div> <div class="modal-footer"> <h3>Modal Footer</h3> </div> </div></div>');
     $('.modal-footer').click(function(){$('#myModal').css('display','none');});
 
-    $('.modal').css({'display':'none', 'position':'fixed', 'z-index':'1', 'padding-top':'100px', 'left':'0', 'top':'0', 'width':'100%', 'height':'100%', 'overflow':'auto', 'background-color':'rgb(0,0,0)', 'background-color':'rgba(0,0,0,0.4)'});
+    $('.modal').css({'display':'none', 'position':'fixed', 'z-index':'999', 'padding-top':'100px', 'left':'0', 'top':'0', 'width':'100%', 'height':'100%', 'overflow':'auto', 'background-color':'rgb(0,0,0)', 'background-color':'rgba(0,0,0,0.4)'});
     $('.modal-content').css({'position':'relative', 'background-color':'#fefefe', 'margin':'auto', 'padding':'0', 'border':'1px solid #888', 'width':'fit-content', 'box-shadow':'0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19)', '-webkit-animation-name':'animatetop','-webkit-animation-duration':'0.4s','animation-name':'animatetop', 'animation-duration':'0.4s'});
     $('.modal-header').css({'padding':'2px 16px', 'background-color':'#5cb85c', 'color':'white'});
     $('.modal-body').css({'padding': '2px 16px', 'color':'black'});
