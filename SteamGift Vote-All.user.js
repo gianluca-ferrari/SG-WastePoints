@@ -16,24 +16,24 @@
 // @grant        GM_setClipboard
 // ==/UserScript==
 /**
- * Adds game to tampermonkey stored wishlist
+ * Add a game to tampermonkey stored wishlist. Returns -1 if fails, 1 if success, 0 if game alredy was wishlisted.
  * @param {string} title 
- * @param {number} appid 
+ * @param {number} appid
  */
 function addToWishlist(title, appid) {
     try{
         var wishlist = loadWishlist();
         var vett = [];
         if(wishlist.find(function(o){return (o.appid == appid);})){
-            return true;
+            return 0;
         }
         wishlist.push({'title':title, 'appid':appid});
         saveWishlist(wishlist);
-        return true;
+        return 1;
     }
     catch(err){
         alert('failed adding game to wishlist: ' + err.message);
-        return false;
+        return -1;
     }
 }
 /**
@@ -209,8 +209,11 @@ function enterGiveaway(ga, deferred) {
             var title = document.getElementsByClassName('apphub_AppName')[0].innerHTML;
             var appid = document.getElementsByClassName('glance_tags popular_tags')[0].getAttribute('data-appid');
             console.log(title + ': ' + appid);
-            if(addToWishlist(title, appid))
+            var re = addToWishlist(title, appid);
+            if(re == 1)
                 div.style.backgroundColor = 'mediumseagreen';
+            else if (re == 0)
+                div.style.backgroundColor = 'cornflowerblue';
             else
                 div.style.backgroundColor = 'red';
 
