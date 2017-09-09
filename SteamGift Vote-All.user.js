@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SG-WastePoints
 // @namespace    gian.scripts
-// @version      1.2.0
+// @version      1.2.1
 // @updateURL    https://github.com/gianluca-ferrari/SG-WastePoints/raw/master/SteamGift%20Vote-All.user.js
 // @description  Vote-all button to enter all giveaways on the page (skips faded ga and esgt-hidden giveaways)
 // @author       gian raiden
@@ -231,7 +231,7 @@ function enterGiveaway(ga, deferred) {
     $('.modal').css({'display':'none', 'position':'fixed', 'z-index':'999', 'padding-top':'100px', 'left':'0', 'top':'0', 'width':'100%', 'height':'100%', 'overflow':'auto', 'background-color':'rgb(0,0,0)', 'background-color':'rgba(0,0,0,0.4)'});
     $('.modal-content').css({'position':'relative', 'background-color':'#fefefe', 'margin':'auto', 'padding':'0', 'border':'1px solid #888', 'width':'fit-content', 'box-shadow':'0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19)', '-webkit-animation-name':'animatetop','-webkit-animation-duration':'0.4s','animation-name':'animatetop', 'animation-duration':'0.4s'});
     $('.modal-header').css({'padding':'2px 16px', 'background-color':'#5cb85c', 'color':'white'});
-    $('.modal-body').css({'padding': '2px 16px', 'color':'black'});
+    $('.modal-body').css({'padding': '2px 16px', 'color':'black', 'max-height':'600px', 'overflow-y':'scroll'});
     $('.modal-footer').css({'padding':'2px 16px', 'background-color':'#5cb85c', 'corol':'white'});
     $('.sgwaste_modal_button').css('display', 'none');
 
