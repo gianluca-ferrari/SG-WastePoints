@@ -7,7 +7,7 @@
 // @author       gian raiden
 // @include      https://www.steamgifts.com/
 // @include      https://www.steamgifts.com/giveaways*
-// @include      http://store.steampowered.com/app/*
+// @include      https://store.steampowered.com/app/*
 // @grant        GM_log
 // @grant        GM_listValues
 // @grant        GM_setValue
@@ -17,7 +17,7 @@
 // ==/UserScript==
 /**
  * Add a game to tampermonkey stored wishlist. Returns -1 if fails, 1 if success, 0 if game alredy was wishlisted.
- * @param {string} title 
+ * @param {string} title
  * @param {number} appid
  */
 function addToWishlist(title, appid) {
