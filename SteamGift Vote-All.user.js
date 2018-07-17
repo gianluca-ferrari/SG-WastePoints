@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SG-WastePoints
 // @namespace    gian.scripts
-// @version      1.2.1
+// @version      1.2.2
 // @updateURL    https://github.com/gianluca-ferrari/SG-WastePoints/raw/master/SteamGift%20Vote-All.user.js
 // @description  Vote-all button to enter all giveaways on the page (skips faded ga and esgt-hidden giveaways)
 // @author       gian raiden
@@ -11,13 +11,13 @@
 // @grant        GM_log
 // @grant        GM_listValues
 // @grant        GM_setValue
-// @grant        GM_deleteValue
+// @grant        GM_deleteVlue
 // @grant        GM_getValue
 // @grant        GM_setClipboard
 // ==/UserScript==
 /**
  * Add a game to tampermonkey stored wishlist. Returns -1 if fails, 1 if success, 0 if game alredy was wishlisted.
- * @param {string} title
+ * @param {string} title 
  * @param {number} appid
  */
 function addToWishlist(title, appid) {
@@ -25,9 +25,11 @@ function addToWishlist(title, appid) {
         var wishlist = loadWishlist();
         var vett = [];
         if(wishlist.find(function(o){return (o.appid == appid);})){
+            console.log(appid + ' already in wishlist');
             return 0;
         }
         wishlist.push({'title':title, 'appid':appid});
+        console.log(appid + ' added to wishlist');
         saveWishlist(wishlist);
         return 1;
     }
@@ -48,6 +50,17 @@ function removeFromWishlist(appid, wishlist){
         return;
     }
     wishlist.splice(i,1);
+    console.log(appid + ' removed from wishlist');
+}
+
+function isInWishlist(appid){
+    var wishlist = loadWishlist();
+    var i = wishlist.findIndex(function(v){return v.appid==appid;});
+    if(i==-1){
+        console.log('item not found | wishlist empty');
+        return false;
+    }
+    return true;
 }
 
 function displayWishlist(wishlist){
@@ -199,24 +212,35 @@ function enterGiveaway(ga, deferred) {
     'use strict';
 
     //STEAM APP PAGE ONLY
-    if (location.href.startsWith('http://store.steampowered.com/app/')){
+    if (location.href.startsWith('https://store.steampowered.com/app/')){
         var div = document.createElement('div');
-        div.innerHTML= `<a class="btnv6_blue_hoverfade btn_medium" href="#" data-store-tooltip="Add to tampermonkey.steamgiftWishlist">
-<span>SG-Wishlist</span>
-</a>`;
+        var appid = document.getElementsByClassName('glance_tags popular_tags')[0].getAttribute('data-appid');
+        var title = document.getElementsByClassName('apphub_AppName')[0].innerHTML;
+        // div.innerHTML= `<a id="waste-points-btn" class="btnv6_blue_hoverfade btn_medium" href="#" data-store-tooltip="Add to tampermonkey.steamgiftWishlist"><span>SG-Wishlist</span></a>`;
+        div.innerHTML= `<span style="line-height: 30px;">SG-Wishlist</span>`;
+        div.style = "border-style: solid; border-width: 1px;";
+        if(isInWishlist(appid)){
+            div.style.backgroundColor = 'mediumseagreen';
+        }
         document.getElementsByClassName('apphub_HeaderStandardTop')[0].appendChild(div);
         div.onclick = function(){
-            var title = document.getElementsByClassName('apphub_AppName')[0].innerHTML;
-            var appid = document.getElementsByClassName('glance_tags popular_tags')[0].getAttribute('data-appid');
             console.log(title + ': ' + appid);
-            var re = addToWishlist(title, appid);
-            if(re == 1)
-                div.style.backgroundColor = 'mediumseagreen';
-            else if (re == 0)
-                div.style.backgroundColor = 'cornflowerblue';
-            else
-                div.style.backgroundColor = 'red';
-
+            var re;
+            if(isInWishlist(appid)){
+                var wishlist = loadWishlist();
+                re = removeFromWishlist(appid, wishlist);
+                saveWishlist(wishlist);
+                div.style.backgroundColor = '';
+            } else {
+                re = addToWishlist(title, appid);
+                if(re == 1){
+                    div.style.backgroundColor = 'mediumseagreen';
+                } else if (re == 0){
+                    div.style.backgroundColor = 'cornflowerblue';
+                } else {
+                    div.style.backgroundColor = 'red';
+                }
+            }
         };
         return;
     }
